@@ -1,3 +1,5 @@
+from datetime import date, datetime
+
 from pydantic import BaseModel
 
 
@@ -57,9 +59,36 @@ class InventoryPartDetail(BaseModel):
     img_url: str | None = None
 
 
+class BricksetInfo(BaseModel):
+    model_config = {"from_attributes": True}
+    price_us: float | None = None
+    price_uk: float | None = None
+    price_ca: float | None = None
+    price_de: float | None = None
+    launch_date: date | None = None
+    exit_date: date | None = None
+    availability: str | None = None
+    packaging_type: str | None = None
+    age_min: int | None = None
+    age_max: int | None = None
+    height_mm: float | None = None
+    width_mm: float | None = None
+    depth_mm: float | None = None
+    weight_g: float | None = None
+    barcode_ean: str | None = None
+    rating: float | None = None
+    review_count: int | None = None
+    owned_by: int | None = None
+    wanted_by: int | None = None
+    description: str | None = None
+    tags: list[str] | None = None
+    last_synced: datetime | None = None
+
+
 class SetFullDetail(SetDetail):
     minifigs: list[MinifigSummary] = []
     parts: list[InventoryPartDetail] = []
+    brickset: BricksetInfo | None = None
 
 
 class PaginatedSets(BaseModel):

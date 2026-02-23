@@ -3,8 +3,9 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session, joinedload
 
 from app.core.database import get_db
-from app.models.lego import Inventory, InventoryMinifig, InventoryPart, Set
+from app.models.lego import BricksetData, Inventory, InventoryMinifig, InventoryPart, Set
 from app.schemas.lego import (
+    BricksetInfo,
     InventoryPartDetail,
     MinifigSummary,
     PaginatedSets,
@@ -62,7 +63,13 @@ def get_set(set_num: str, db: Session = Depends(get_db)):
     if not lego_set:
         raise HTTPException(status_code=404, detail="Set not found")
 
-    # Get latest inventory
+    # Brickset verrijkingsdata
+    brickset_row = db.scalar(
+        select(BricksetData).where(BricksetData.set_num == set_num)
+    )
+    brickset = BricksetInfo.model_validate(brickset_row) if brickset_row else None
+
+    # Meest recente inventaris ophalen
     inventory = db.scalar(
         select(Inventory)
         .where(Inventory.set_num == set_num)
@@ -104,4 +111,5 @@ def get_set(set_num: str, db: Session = Depends(get_db)):
         **SetDetail.model_validate(lego_set).model_dump(),
         parts=parts,
         minifigs=minifigs,
+        brickset=brickset,
     )

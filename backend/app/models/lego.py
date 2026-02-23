@@ -1,4 +1,7 @@
-from sqlalchemy import Boolean, ForeignKey, Integer, SmallInteger, String, Text
+from datetime import date, datetime
+
+from sqlalchemy import Boolean, Date, DateTime, Float, ForeignKey, Integer, Numeric, SmallInteger, String, Text
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -39,7 +42,6 @@ class Set(Base):
     img_url: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     theme: Mapped["Theme"] = relationship(back_populates="sets")
-    inventories: Mapped[list["Inventory"]] = relationship(back_populates="set")
 
 
 class Minifig(Base):
@@ -101,9 +103,9 @@ class Inventory(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     version: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
-    set_num: Mapped[str] = mapped_column(String(20), ForeignKey("sets.set_num"), nullable=False)
+    # set_num can reference either a set or a minifig (fig-XXXXXX), so no FK constraint
+    set_num: Mapped[str] = mapped_column(String(20), nullable=False)
 
-    set: Mapped["Set"] = relationship(back_populates="inventories")
     inventory_parts: Mapped[list["InventoryPart"]] = relationship(back_populates="inventory")
     inventory_minifigs: Mapped[list["InventoryMinifig"]] = relationship(back_populates="inventory")
     inventory_sets: Mapped[list["InventorySet"]] = relationship(
@@ -150,3 +152,52 @@ class InventorySet(Base):
     inventory: Mapped["Inventory"] = relationship(
         back_populates="inventory_sets", foreign_keys=[inventory_id]
     )
+
+
+class BricksetData(Base):
+    """Extra set data sourced from the Brickset API."""
+
+    __tablename__ = "brickset_data"
+
+    set_num: Mapped[str] = mapped_column(String(20), ForeignKey("sets.set_num"), primary_key=True)
+    brickset_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    # Pricing per regio in lokale valuta (US$, UK£, CA$, DE€)
+    price_us: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
+    price_uk: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
+    price_ca: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
+    price_de: Mapped[float | None] = mapped_column(Numeric(10, 2), nullable=True)
+
+    # Beschikbaarheid
+    launch_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    exit_date: Mapped[date | None] = mapped_column(Date, nullable=True)
+    availability: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    packaging_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
+
+    # Fysieke eigenschappen
+    age_min: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    age_max: Mapped[int | None] = mapped_column(SmallInteger, nullable=True)
+    height_mm: Mapped[float | None] = mapped_column(Float, nullable=True)
+    width_mm: Mapped[float | None] = mapped_column(Float, nullable=True)
+    depth_mm: Mapped[float | None] = mapped_column(Float, nullable=True)
+    weight_g: Mapped[float | None] = mapped_column(Float, nullable=True)
+
+    # Identifiers
+    barcode_ean: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    barcode_upc: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    item_number: Mapped[str | None] = mapped_column(String(20), nullable=True)
+
+    # Community
+    rating: Mapped[float | None] = mapped_column(Float, nullable=True)
+    review_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    owned_by: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    wanted_by: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    # Inhoud
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    tags: Mapped[list[str] | None] = mapped_column(ARRAY(String), nullable=True)
+
+    # Meta
+    last_synced: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+    set: Mapped["Set"] = relationship(backref="brickset_data")

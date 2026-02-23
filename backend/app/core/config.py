@@ -10,6 +10,7 @@ class Settings(BaseSettings):
 
     database_url: str = "postgresql://brickviewer:brickviewer@localhost:5432/brickviewer"
     rebrickable_api_key: str = ""
+    brickset_api_key: str = ""
     cors_origins: str = "http://localhost:3000"
 
     @property

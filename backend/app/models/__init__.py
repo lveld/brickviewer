@@ -1,4 +1,5 @@
 from app.models.lego import (
+    BricksetData,
     Color,
     Element,
     Inventory,
@@ -14,6 +15,7 @@ from app.models.lego import (
 )
 
 __all__ = [
+    "BricksetData",
     "Color",
     "Element",
     "Inventory",

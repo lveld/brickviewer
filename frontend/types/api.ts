@@ -13,10 +13,36 @@ export interface SetSummary {
   img_url: string | null
 }
 
+export interface BricksetInfo {
+  price_us: number | null
+  price_uk: number | null
+  price_ca: number | null
+  price_de: number | null
+  launch_date: string | null
+  exit_date: string | null
+  availability: string | null
+  packaging_type: string | null
+  age_min: number | null
+  age_max: number | null
+  height_mm: number | null
+  width_mm: number | null
+  depth_mm: number | null
+  weight_g: number | null
+  barcode_ean: string | null
+  rating: number | null
+  review_count: number | null
+  owned_by: number | null
+  wanted_by: number | null
+  description: string | null
+  tags: string[] | null
+  last_synced: string | null
+}
+
 export interface SetDetail extends SetSummary {
   theme: Theme
   parts: InventoryPartDetail[]
   minifigs: MinifigSummary[]
+  brickset: BricksetInfo | null
 }
 
 export interface MinifigSummary {
